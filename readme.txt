@@ -1,4 +1,4 @@
-
+﻿
 ----------------项目构建----------------------
 基于maven module 的项目构建
 父项目为ishop，子项目util、model、dao、core、web
@@ -59,5 +59,5 @@ tomcat热部署： 设置ishop-web项目的output目录为ishop-web/src/main/web
 
 ----------------Version----------------------
 当前版本： 1.0.0
-深圳市星云风互联科技有限公司
+author：许小龙
 
