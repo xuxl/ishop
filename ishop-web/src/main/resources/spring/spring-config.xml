@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+	default-autowire="no">
+	<!--此bean告诉Spring去哪找数据库的配置信息,因为有此Bean才出现下面用${}标记来取变量的语句-->
+	<bean id="propertyConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--数据源-->
+	<!--
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>${jdbc.driver}</value>
+		</property>
+		<property name="url">
+			<value>${jdbc.url}</value>
+		</property>
+		<property name="username">
+			<value>${jdbc.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.password}</value>
+		</property>
+	</bean>
+	-->
+	
+	<!--连接池 -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">  
+		<property name="jndiName" value="java:comp/env/jdbc/myshop" />
+	</bean>
+	
+	
+	<!--根据dataSource和configLocation创建一个SqlMapClient-->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="dataSource">
+			<ref local="dataSource"/>
+		</property>
+		<property name="sqlMapClientProperties">
+			<props>
+				<prop key="jdbcDriver">${jdbc.driver}</prop>
+			</props>
+		</property>
+		<property name="configLocation">
+			<value>/WEB-INF/classes/ibatis/SqlMapConfig.xml</value>
+		</property>
+	</bean>
+
+	<!--根据sqlMapClien创建一个SqlMapClient模版类-->
+	<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient">
+			<ref bean="sqlMapClient"/>
+		</property>
+	</bean>
+	
+	<!--**************************************************************************************-->
+    
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+		<property name="dataSource" ref="dataSource"/>  
+	</bean>  
+     
+	<!-- 配置事务拦截器 -->  
+	<bean id="transactionInterceptor"  
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">  
+		<!-- 事务拦截器bean依赖注入一个事务管理器 -->  
+		<property name="transactionManager" ref="transactionManager"></property>  
+		<property name="transactionAttributes">  
+			<!-- 下面定义事物的传播属性 -->  
+			<props>  
+				<prop key="add*">PROPAGATION_REQUIRED</prop>
+				<prop key="del*">PROPAGATION_REQUIRED</prop>
+				<prop key="update*">PROPAGATION_REQUIRED</prop>  
+				<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>  
+			</props>  
+		</property>  
+	</bean>  
+        
+	<!--**************************************************************************************-->	
+	
+	<!-- 定义BeanNameAutoProxyCreator的bean后处理器 -->  
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">  
+		<property name="beanNames">  
+			<list>
+				<value>baseService</value>
+			</list>  
+		</property>  
+		<property name="interceptorNames">  
+			<list>  
+				<value>transactionInterceptor</value>  
+			</list>  
+		</property>  
+	</bean> 
+
+</beans>

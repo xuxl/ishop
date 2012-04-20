@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+	"http://struts.apache.org/dtds/struts-2.1.dtd">
+
+<struts>
+	<include file="struts/struts-context-user.xml" />
+	<!--用到json时需继承"json-default"-->
+	<!--<package name="struts-default" extends="json-default"></package>-->
+    
+    <!--全局results配置 -->
+	<package name="struts" extends="struts-default">
+		<global-results>
+			<result>/fail.jsp</result>
+		</global-results>
+	</package>
+    
+</struts>
